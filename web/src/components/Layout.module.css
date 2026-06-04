@@ -1,0 +1,16 @@
+.shell { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 220px; background: #1a56db; color: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
+.brand { padding: 20px 20px 16px; display: flex; flex-direction: column; gap: 6px; }
+.logoImg { width: 130px; height: auto; display: block; }
+.brand span { opacity: 0.55; font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; }
+.nav { flex: 1; padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; }
+.navItem { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,0.75); font-size: 14px; font-weight: 500; transition: background 0.15s; }
+.navItem:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.active { background: rgba(255,255,255,0.18) !important; color: #fff !important; font-weight: 600; }
+.icon { font-size: 16px; width: 20px; text-align: center; }
+.userArea { padding: 16px; border-top: 1px solid rgba(255,255,255,0.15); }
+.userName { font-weight: 600; font-size: 13px; }
+.userRole { font-size: 11px; opacity: 0.6; text-transform: uppercase; margin-bottom: 10px; }
+.logoutBtn { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+.logoutBtn:hover { background: rgba(255,255,255,0.25); }
+.main { flex: 1; overflow-y: auto; background: #f9fafb; }

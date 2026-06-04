@@ -1,0 +1,13 @@
+{
+  "name": "proteger-collect",
+  "private": true,
+  "workspaces": ["backend", "web", "mobile"],
+  "scripts": {
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:web": "pnpm --filter web dev"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  }
+}

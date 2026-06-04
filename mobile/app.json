@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Proteger Collect",
+    "slug": "proteger-collect",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "proteger",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#1a56db"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.proteger.collect"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1a56db"
+      },
+      "package": "com.proteger.collect"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
