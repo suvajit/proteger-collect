@@ -1,11 +1,55 @@
-# Proteger-Collect
+# Proteger-Collect — Facility Maintenance Checklist & Issue Tracking System
 
-Field-service daily checklist system.
+**Open-source preventive maintenance and daily inspection management for housing societies, residential complexes, hotels, serviced apartments, and small office buildings.**
 
-Built this solution to routinely monitor & maintain the utilities & facilities of our Housing Society.
-The system allows to add/remove checklist and category as per your need as Admin from web console.
-It also has a quick in built issue tracking process. Issues reported during routine checks can be closed by supervisor with proof once addressed.
-The Dashboard provides clear monitoring on key measure like issues by category or age. MTTR/MTBF is a good measure.
+Proteger-Collect replaces paper-based daily maintenance logbooks and Excel sheets with a mobile-first digital system. Field supervisors complete SOP-driven preventive maintenance checklists on their phone — even offline — while facility managers and property administrators get real-time visibility through a web dashboard.
+
+---
+
+## Why Proteger-Collect?
+
+Most facility management software is built for large enterprises. Housing societies, boutique hotels, serviced apartments, and small commercial buildings need something simpler: a structured way to make sure daily preventive maintenance checks actually happen, issues get reported with proof, and nothing slips through the cracks.
+
+Proteger-Collect is purpose-built for this:
+
+- 🏢 **Housing societies & residential complexes** — track daily PM checks across common areas, lifts, generators, water systems, CCTV, and security equipment
+- 🏨 **Hotels & serviced apartments** — assign routine inspection checklists to maintenance staff, capture issues with photos, and monitor resolution from the front desk
+- 🏬 **Small office buildings** — enforce SOPs for electrical panels, plumbing, fire safety, and cleaning without paper logbooks
+- 🏭 **Facilities managed by contract teams** — give your outsourced maintenance supervisor a structured daily checklist and a simple way to report issues with timestamps and photos
+
+---
+
+## Key Features
+
+### 📱 Mobile App (Supervisor)
+- Login and access today's checklist grouped by category (electrical, plumbing, safety, HVAC, etc.)
+- Tap to mark each item: **Done**, **Issue Found**, or **Not Applicable**
+- Server-authoritative timestamps — no manual time entry, no fudging
+- Mandatory photo capture for critical items (e.g. fire extinguisher checks)
+- Add remarks; **Issue Found** requires a written remark
+- Works **offline** — captures entries locally and syncs on reconnect
+- Mark issues as **Resolved** with a resolution remark and photo proof
+
+### 🖥️ Web Admin Portal (Facility Manager)
+- **Real-time dashboard** with daily completion %, open issue count, and submission status
+- **Submissions view** — filter by date, supervisor, or status; drill into any sheet
+- **Issue tracker** — cross-sheet view of all flagged issues with resolution status, time-to-resolve, and expandable detail
+- **Pareto chart** — which categories generate the most issues (identify systemic problems)
+- **Issue age distribution** — how long open issues have been sitting unresolved
+- **MTTR (Mean Time To Resolve)** and **MTBF (Mean Time Between Failures)** KPIs
+- **Checklist management** — add, edit, reorder, or deactivate checks without a developer; changes apply to future sheets only, historical records stay intact
+- **Unlock for resubmission** — admin can reopen a submitted sheet if a supervisor needs to correct an entry
+- **User management** — create supervisor accounts, reset passwords, activate/deactivate
+
+### 🔐 Audit & Accountability
+- Every entry carries the supervisor's identity and a server-set timestamp — cannot be backdated
+- Submitted sheets are immutable (audit trail preserved)
+- Soft-delete for checklist items — historical sheets always show the checks as they were on that date
+- Full resolution trail: issue reported → timestamp → resolved by supervisor → resolution remark + photo → resolved timestamp
+
+---
+
+## Tech Stack
 
 
 | Layer | Stack |
