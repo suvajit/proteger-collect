@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from './client';
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
 
 export async function uploadPhoto(uri: string): Promise<string> {
   const token = await AsyncStorage.getItem('accessToken');

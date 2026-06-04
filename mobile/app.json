@@ -18,9 +18,17 @@
       "adaptiveIcon": {
         "backgroundColor": "#1a56db"
       },
-      "package": "com.proteger.collect"
+      "package": "com.proteger.collect",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      "expo-image-picker"
+    ],
     "experiments": {
       "typedRoutes": true
     }
