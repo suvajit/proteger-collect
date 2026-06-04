@@ -2,6 +2,12 @@
 
 Field-service daily checklist system.
 
+Built this solution to routinely monitor & maintain the utilities & facilities of our Housing Society.
+The system allows to add/remove checklist and category as per your need as Admin from web console.
+It also has a quick in built issue tracking process. Issues reported during routine checks can be closed by supervisor with proof once addressed.
+The Dashboard provides clear monitoring on key measure like issues by category or age. MTTR/MTBF is a good measure.
+
+
 | Layer | Stack |
 |---|---|
 | **API** | Node.js 20, NestJS, Prisma ORM, PostgreSQL 14+ |
