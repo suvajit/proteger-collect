@@ -8,6 +8,7 @@ import SheetDetailPage from './pages/SheetDetailPage';
 import IssuesPage from './pages/IssuesPage';
 import ChecklistPage from './pages/ChecklistPage';
 import UsersPage from './pages/UsersPage';
+import SettingsPage from './pages/SettingsPage';
 import Layout from './components/Layout';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -28,6 +29,7 @@ function AppRoutes() {
         <Route path="issues" element={<IssuesPage />} />
         <Route path="checklist" element={<ChecklistPage />} />
         <Route path="users" element={<UsersPage />} />
+        <Route path="settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

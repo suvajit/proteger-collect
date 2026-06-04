@@ -8,6 +8,7 @@ const NAV = [
   { to: '/issues', label: 'Issues', icon: '⚠' },
   { to: '/checklist', label: 'Checklist', icon: '✓' },
   { to: '/users', label: 'Users', icon: '👤' },
+  { to: '/settings', label: 'Settings', icon: '⚙' },
 ];
 
 export default function Layout() {

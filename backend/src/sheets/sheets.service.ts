@@ -7,10 +7,14 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { Frequency, SheetStatus, EntryStatus } from '@prisma/client';
 import { UpdateEntryDto } from './dto/update-entry.dto';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class SheetsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private email: EmailService,
+  ) {}
 
   async getOrCreateToday(supervisorId: string) {
     const today = new Date();
@@ -91,10 +95,31 @@ export class SheetsService {
     if (sheet.status === SheetStatus.submitted)
       throw new ForbiddenException('Sheet already submitted');
 
-    return this.prisma.dailySheet.update({
+    const updated = await this.prisma.dailySheet.update({
       where: { id: sheetId },
       data: { status: SheetStatus.submitted, submittedAt: new Date() },
     });
+
+    // Send notification email (non-blocking)
+    const fullSheet = await this.prisma.dailySheet.findUnique({
+      where: { id: sheetId },
+      include: {
+        supervisor: { select: { fullName: true, username: true } },
+        entries: {
+          select: {
+            itemTitle: true,
+            categoryName: true,
+            status: true,
+            remark: true,
+            completedAt: true,
+          },
+        },
+      },
+    });
+    if (fullSheet) {
+      this.email.sendSheetSubmittedEmail(fullSheet as any).catch(() => {});
+    }
+    return updated;
   }
 
   async resolveEntry(

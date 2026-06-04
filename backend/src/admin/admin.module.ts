@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AdminSettingsController } from './settings/admin-settings.controller';
 import { AdminSheetsController } from './sheets/admin-sheets.controller';
 import { AdminSheetsService } from './sheets/admin-sheets.service';
 import { AdminCategoriesController } from './categories/admin-categories.controller';
@@ -10,6 +11,7 @@ import { AdminUsersService } from './users/admin-users.service';
 
 @Module({
   controllers: [
+    AdminSettingsController,
     AdminSheetsController,
     AdminCategoriesController,
     AdminItemsController,
