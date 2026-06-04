@@ -44,6 +44,9 @@ export default function UsersPage() {
     onSuccess: () => { setResetUser(null); setTempPw(''); },
   });
 
+  const createError = (createUser.error as Error)?.message;
+  const resetError = (resetPw.error as Error)?.message;
+
   return (
     <div style={{ padding: 32 }}>
       <PageHeader title="Users" subtitle={`${users?.length ?? 0} accounts`}
@@ -78,6 +81,11 @@ export default function UsersPage() {
       {showModal && (
         <Modal title="New User" onClose={() => setShowModal(false)}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {createError && (
+              <div style={{ background: '#fee2e2', color: '#991b1b', padding: '10px 14px', borderRadius: 8, fontSize: 13 }}>
+                {createError}
+              </div>
+            )}
             <input style={formInp} placeholder="Full name" value={form.fullName} onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))} />
             <input style={formInp} placeholder="Username" value={form.username} onChange={e => setForm(f => ({ ...f, username: e.target.value }))} />
             <input style={formInp} placeholder="Email (optional)" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
@@ -88,7 +96,9 @@ export default function UsersPage() {
             <input style={formInp} placeholder="Temporary password (min 8 chars)" type="password" value={form.tempPassword} onChange={e => setForm(f => ({ ...f, tempPassword: e.target.value }))} />
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
               <button onClick={() => setShowModal(false)} style={outlineBtn}>Cancel</button>
-              <button onClick={() => createUser.mutate(form)} style={primaryBtn}>Create</button>
+              <button onClick={() => createUser.mutate(form)} disabled={createUser.isPending} style={{ ...primaryBtn, opacity: createUser.isPending ? 0.7 : 1 }}>
+                {createUser.isPending ? 'Creating…' : 'Create'}
+              </button>
             </div>
           </div>
         </Modal>
@@ -96,10 +106,17 @@ export default function UsersPage() {
 
       {resetUser && (
         <Modal title={`Reset password — ${resetUser.fullName}`} onClose={() => { setResetUser(null); setTempPw(''); }}>
-          <input style={{ ...formInp, marginBottom: 20 }} placeholder="New temporary password" type="password" value={tempPw} onChange={e => setTempPw(e.target.value)} autoFocus />
+          {resetError && (
+            <div style={{ background: '#fee2e2', color: '#991b1b', padding: '10px 14px', borderRadius: 8, fontSize: 13, marginBottom: 12 }}>
+              {resetError}
+            </div>
+          )}
+          <input style={{ ...formInp, marginBottom: 20 }} placeholder="New temporary password (min 8 chars)" type="password" value={tempPw} onChange={e => setTempPw(e.target.value)} autoFocus />
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
             <button onClick={() => { setResetUser(null); setTempPw(''); }} style={outlineBtn}>Cancel</button>
-            <button onClick={() => resetPw.mutate({ id: resetUser.id, tempPassword: tempPw })} style={primaryBtn}>Reset</button>
+            <button onClick={() => resetPw.mutate({ id: resetUser.id, tempPassword: tempPw })} disabled={resetPw.isPending} style={{ ...primaryBtn, opacity: resetPw.isPending ? 0.7 : 1 }}>
+              {resetPw.isPending ? 'Resetting…' : 'Reset'}
+            </button>
           </div>
         </Modal>
       )}

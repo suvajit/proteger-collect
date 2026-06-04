@@ -17,6 +17,9 @@ import {
 import { useAuth } from '../../src/context/AuthContext';
 import { sheetsApi, Sheet, CheckEntry, EntryStatus, uploadPhoto } from '../../src/api/sheets';
 import ProtegerLogo from '../../src/components/ProtegerLogo';
+import { useNetworkStatus } from '../../src/hooks/useNetworkStatus';
+import { enqueueEntry, getQueue, removeFromQueue, QueuedEntry } from '../../src/services/offlineQueue';
+import 'react-native-get-random-values';
 
 const STATUS_COLORS: Record<EntryStatus, string> = {
   pending: '#e5e7eb',
@@ -137,10 +140,12 @@ interface EntryRowProps {
   entry: CheckEntry;
   sheetId: string;
   submitted: boolean;
+  isOnline: boolean;
   onUpdate: (entry: CheckEntry) => void;
+  onQueueUpdate: () => void;
 }
 
-function EntryRow({ entry, sheetId, submitted, onUpdate }: EntryRowProps) {
+function EntryRow({ entry, sheetId, submitted, isOnline, onUpdate, onQueueUpdate }: EntryRowProps) {
   const [updating, setUpdating] = useState(false);
   const [remarkModal, setRemarkModal] = useState(false);
   const [resolveModal, setResolveModal] = useState(false);
@@ -209,6 +214,14 @@ function EntryRow({ entry, sheetId, submitted, onUpdate }: EntryRowProps) {
       setRemarkModal(true);
       return;
     }
+    if (!isOnline) {
+      // Queue offline — optimistically update UI
+      const clientOpId = `${entry.id}-${Date.now()}`;
+      await enqueueEntry({ clientOpId, sheetId, entryId: entry.id, data: { status }, timestamp: Date.now() });
+      onUpdate({ ...entry, status: status as EntryStatus, completedAt: new Date().toISOString() });
+      onQueueUpdate();
+      return;
+    }
     setUpdating(true);
     try {
       const updated = await sheetsApi.updateEntry(sheetId, entry.id, { status });
@@ -227,6 +240,14 @@ function EntryRow({ entry, sheetId, submitted, onUpdate }: EntryRowProps) {
       return;
     }
     setRemarkModal(false);
+    if (!isOnline) {
+      const clientOpId = `${entry.id}-${Date.now()}`;
+      await enqueueEntry({ clientOpId, sheetId, entryId: entry.id, data: { status, remark }, timestamp: Date.now() });
+      onUpdate({ ...entry, status: status as EntryStatus, remark, completedAt: new Date().toISOString() });
+      onQueueUpdate();
+      pendingStatus.current = null;
+      return;
+    }
     setUpdating(true);
     try {
       const updated = await sheetsApi.updateEntry(sheetId, entry.id, { status, remark });
@@ -368,10 +389,12 @@ interface CategorySectionProps {
   entries: CheckEntry[];
   sheetId: string;
   submitted: boolean;
+  isOnline: boolean;
   onUpdate: (entry: CheckEntry) => void;
+  onQueueUpdate: () => void;
 }
 
-function CategorySection({ categoryName, entries, sheetId, submitted, onUpdate }: CategorySectionProps) {
+function CategorySection({ categoryName, entries, sheetId, submitted, isOnline, onUpdate, onQueueUpdate }: CategorySectionProps) {
   const [expanded, setExpanded] = useState(true);
   const doneCount = entries.filter((e) => e.status !== 'pending').length;
   const issueCount = entries.filter((e) => e.status === 'issue').length;
@@ -395,7 +418,9 @@ function CategorySection({ categoryName, entries, sheetId, submitted, onUpdate }
           entry={entry}
           sheetId={sheetId}
           submitted={submitted}
+          isOnline={isOnline}
           onUpdate={onUpdate}
+          onQueueUpdate={onQueueUpdate}
         />
       ))}
     </View>
@@ -408,13 +433,36 @@ export default function ChecklistScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [pendingSync, setPendingSync] = useState(0);
+  const [syncing, setSyncing] = useState(false);
+  const isOnline = useNetworkStatus();
+
+  const syncQueue = useCallback(async () => {
+    const queue = await getQueue();
+    if (queue.length === 0) return;
+    setSyncing(true);
+    let synced = 0;
+    for (const item of queue) {
+      try {
+        await sheetsApi.updateEntry(item.sheetId, item.entryId, item.data as any);
+        await removeFromQueue(item.clientOpId);
+        synced++;
+      } catch (_) {
+        // Keep in queue, retry next time
+      }
+    }
+    setSyncing(false);
+    const remaining = await getQueue();
+    setPendingSync(remaining.length);
+    if (synced > 0) fetchSheet();
+  }, []);
 
   const fetchSheet = useCallback(async () => {
     try {
       const s = await sheetsApi.getToday();
       setSheet(s);
     } catch (e: any) {
-      if (!e.message?.includes('Session expired')) {
+      if (!e.message?.includes('Session expired') && !e.message?.includes('Network')) {
         Alert.alert('Error', e.message);
       }
     } finally {
@@ -422,6 +470,19 @@ export default function ChecklistScreen() {
       setRefreshing(false);
     }
   }, []);
+
+  // Sync queued entries when coming back online
+  useEffect(() => {
+    if (isOnline) {
+      syncQueue();
+      fetchSheet();
+    }
+  }, [isOnline]);
+
+  // Keep pending count updated
+  useEffect(() => {
+    getQueue().then((q) => setPendingSync(q.length));
+  }, [sheet]);
 
   useEffect(() => {
     // Initial load — only fetch if we have a token
@@ -433,14 +494,14 @@ export default function ChecklistScreen() {
   useEffect(() => {
     // Refresh when app comes back to foreground (catches admin unlock)
     const sub = AppState.addEventListener('change', (state: AppStateStatus) => {
-      if (state === 'active') fetchSheet();
+      if (state === 'active') { fetchSheet(); if (isOnline) syncQueue(); }
     });
     return () => sub.remove();
-  }, [fetchSheet]);
+  }, [fetchSheet, isOnline, syncQueue]);
 
   useEffect(() => {
     // Poll every 30 seconds so unlock reflects without any user action
-    const interval = setInterval(fetchSheet, 30_000);
+    const interval = setInterval(() => { fetchSheet(); if (isOnline) syncQueue(); }, 30_000);
     return () => clearInterval(interval);
   }, [fetchSheet]);
 
@@ -515,6 +576,26 @@ export default function ChecklistScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Offline / sync status banner */}
+      {!isOnline && (
+        <View style={styles.offlineBanner}>
+          <Text style={styles.offlineBannerText}>
+            📴 Offline — entries will sync when reconnected{pendingSync > 0 ? ` (${pendingSync} pending)` : ''}
+          </Text>
+        </View>
+      )}
+      {isOnline && syncing && (
+        <View style={styles.syncBanner}>
+          <ActivityIndicator size="small" color="#fff" style={{ marginRight: 6 }} />
+          <Text style={styles.syncBannerText}>Syncing {pendingSync} queued entries…</Text>
+        </View>
+      )}
+      {isOnline && !syncing && pendingSync > 0 && (
+        <View style={styles.syncBanner}>
+          <Text style={styles.syncBannerText}>⟳ {pendingSync} entries pending sync</Text>
+        </View>
+      )}
+
       <ProgressBar completed={sheet.progress.completed} total={sheet.progress.total} />
 
       {submitted && (
@@ -539,7 +620,9 @@ export default function ChecklistScreen() {
             entries={cat.entries}
             sheetId={sheet.id}
             submitted={submitted}
+            isOnline={isOnline}
             onUpdate={updateEntry}
+            onQueueUpdate={() => getQueue().then((q) => setPendingSync(q.length))}
           />
         ))}
       </ScrollView>
@@ -587,6 +670,22 @@ const styles = StyleSheet.create({
   progressBg: { height: 8, backgroundColor: '#e5e7eb', borderRadius: 4, marginBottom: 6 },
   progressFill: { height: 8, backgroundColor: '#1a56db', borderRadius: 4 },
   progressText: { fontSize: 12, color: '#6b7280' },
+  offlineBanner: {
+    backgroundColor: '#374151',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  offlineBannerText: { color: '#f9fafb', fontSize: 12, fontWeight: '500' },
+  syncBanner: {
+    backgroundColor: '#1a56db',
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  syncBannerText: { color: '#fff', fontSize: 12, fontWeight: '500' },
   submittedBanner: {
     backgroundColor: '#d1fae5',
     padding: 10,
