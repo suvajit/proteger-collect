@@ -17,7 +17,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "http://jssapi.proteger.one"
+        "EXPO_PUBLIC_API_URL": "https://jssapi.proteger.one"
       }
     },
     "production": {

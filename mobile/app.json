@@ -19,6 +19,7 @@
         "backgroundColor": "#1a56db"
       },
       "package": "com.proteger.collect",
+      "usesCleartextTraffic": true,
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
