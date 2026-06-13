@@ -57,6 +57,24 @@ async function bootstrap() {
 
   const msg = `API running on port ${port} | uploads → ${uploadsDir} | logs → ${logsDir}`;
   bootLogger.log(msg);
+
+  // Log all registered routes so we can verify /uploads POST is registered
+  const server: any = app.getHttpServer();
+  const router = server?._events?.request?._router;
+  if (router?.stack) {
+    const routes: string[] = [];
+    router.stack.forEach((layer: any) => {
+      if (layer?.route?.path) {
+        const methods = Object.keys(layer.route.methods).map((m: string) => m.toUpperCase()).join(',');
+        routes.push(`${methods} ${layer.route.path}`);
+      }
+    });
+    if (routes.length) {
+      bootLogger.log(`Registered routes:\n  ${routes.join('\n  ')}`);
+      logToFile('info', 'Registered routes', { routes });
+    }
+  }
+
   logToFile('info', 'API started successfully', { port, uploadsDir });
 
   // Catch unhandled promise rejections and log them
