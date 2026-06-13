@@ -3,7 +3,8 @@ dist/
 .env
 *.local
 .DS_Store
-uploads/
+# Ignore runtime uploads folder (photo storage) but not the src/uploads module
+backend/uploads/
 *.db
 pnpm-lock.yaml
 .expo/

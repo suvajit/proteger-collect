@@ -10,10 +10,12 @@ interface Issue {
   itemTitle: string;
   categoryName: string;
   remark: string | null;
+  photoUrl: string | null;
   completedAt: string | null;
   isResolved: boolean;
   resolvedAt: string | null;
   resolutionRemark: string | null;
+  resolutionPhotoUrl: string | null;
   sheet: { id: string; sheetDate: string; supervisor: { fullName: string } };
 }
 
@@ -115,6 +117,18 @@ export default function IssuesPage() {
                     <div style={{ fontSize: 11, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', marginBottom: 6 }}>Issue Details</div>
                     <div style={{ fontSize: 13 }}><span style={{ color: '#9ca3af' }}>Reported: </span>{i.completedAt ? new Date(i.completedAt).toLocaleString() : '—'}</div>
                     <div style={{ fontSize: 13, marginTop: 4 }}><span style={{ color: '#9ca3af' }}>Remark: </span>{i.remark || '—'}</div>
+                    {i.photoUrl && (
+                      <div style={{ marginTop: 10 }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', marginBottom: 6 }}>Issue Photo</div>
+                        <a href={i.photoUrl} target="_blank" rel="noopener noreferrer">
+                          <img
+                            src={i.photoUrl}
+                            alt="Issue photo"
+                            style={{ maxWidth: 220, maxHeight: 160, borderRadius: 8, border: '1.5px solid #e5e7eb', objectFit: 'cover', cursor: 'pointer' }}
+                          />
+                        </a>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', marginBottom: 6 }}>Resolution</div>
@@ -123,6 +137,18 @@ export default function IssuesPage() {
                         <div style={{ fontSize: 13 }}><span style={{ color: '#9ca3af' }}>Resolved at: </span>{new Date(i.resolvedAt!).toLocaleString()}</div>
                         <div style={{ fontSize: 13, marginTop: 4 }}><span style={{ color: '#9ca3af' }}>Remark: </span>{i.resolutionRemark || '—'}</div>
                         {i.completedAt && <div style={{ fontSize: 13, marginTop: 4 }}><span style={{ color: '#9ca3af' }}>Time to resolve: </span><strong>{formatDuration(i.completedAt, i.resolvedAt!)}</strong></div>}
+                        {i.resolutionPhotoUrl && (
+                          <div style={{ marginTop: 10 }}>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', marginBottom: 6 }}>Resolution Photo</div>
+                            <a href={i.resolutionPhotoUrl} target="_blank" rel="noopener noreferrer">
+                              <img
+                                src={i.resolutionPhotoUrl}
+                                alt="Resolution photo"
+                                style={{ maxWidth: 220, maxHeight: 160, borderRadius: 8, border: '1.5px solid #e5e7eb', objectFit: 'cover', cursor: 'pointer' }}
+                              />
+                            </a>
+                          </div>
+                        )}
                       </>
                     ) : (
                       <div style={{ fontSize: 13, color: '#dc2626' }}>Not yet resolved</div>

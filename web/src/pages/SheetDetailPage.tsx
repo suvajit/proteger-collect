@@ -5,7 +5,19 @@ import { api } from '../api/client';
 import Badge from '../components/Badge';
 
 type EntryStatus = 'pending' | 'done' | 'issue' | 'na';
-interface Entry { id: string; itemTitle: string; categoryName: string; status: EntryStatus; completedAt: string | null; remark: string | null; }
+interface Entry {
+  id: string;
+  itemTitle: string;
+  categoryName: string;
+  status: EntryStatus;
+  completedAt: string | null;
+  remark: string | null;
+  photoUrl: string | null;
+  isResolved: boolean;
+  resolvedAt: string | null;
+  resolutionRemark: string | null;
+  resolutionPhotoUrl: string | null;
+}
 interface Sheet { id: string; sheetDate: string; status: string; submittedAt: string | null; supervisor: { fullName: string; username: string }; entries: Entry[]; }
 
 const STATUS_VARIANT: Record<EntryStatus, 'success' | 'danger' | 'gray' | 'warning'> = { done: 'success', issue: 'danger', na: 'gray', pending: 'warning' };
@@ -76,14 +88,39 @@ export default function SheetDetailPage() {
         <div key={cat} style={{ background: '#fff', borderRadius: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.08)', marginBottom: 16, overflow: 'hidden' }}>
           <div style={{ background: '#f3f4f6', padding: '10px 20px', fontWeight: 700, fontSize: 12, textTransform: 'uppercase', color: '#374151', letterSpacing: 0.5 }}>{cat}</div>
           {entries.map(e => (
-            <div key={e.id} style={{ display: 'flex', alignItems: 'center', padding: '12px 20px', borderBottom: '1px solid #f3f4f6', gap: 16 }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 500 }}>{e.itemTitle}</div>
-                {e.remark && <div style={{ color: '#6b7280', fontSize: 12, marginTop: 2, fontStyle: 'italic' }}>{e.remark}</div>}
-              </div>
-              <div style={{ textAlign: 'right', minWidth: 120 }}>
-                <Badge label={STATUS_LABEL[e.status]} variant={STATUS_VARIANT[e.status]} />
-                {e.completedAt && <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>{new Date(e.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>}
+            <div key={e.id} style={{ padding: '12px 20px', borderBottom: '1px solid #f3f4f6' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 500 }}>{e.itemTitle}</div>
+                  {e.remark && <div style={{ color: '#6b7280', fontSize: 12, marginTop: 2, fontStyle: 'italic' }}>⚠ {e.remark}</div>}
+                  {/* Issue resolution info */}
+                  {e.status === 'issue' && e.isResolved && e.resolutionRemark && (
+                    <div style={{ color: '#059669', fontSize: 12, marginTop: 2 }}>✓ {e.resolutionRemark}</div>
+                  )}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+                  {/* Issue photo thumbnail */}
+                  {e.photoUrl && (
+                    <a href={e.photoUrl} target="_blank" rel="noopener noreferrer" title="View issue photo">
+                      <img src={e.photoUrl} alt="photo" style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover', border: '1.5px solid #e5e7eb' }} />
+                    </a>
+                  )}
+                  {/* Resolution photo thumbnail */}
+                  {e.resolutionPhotoUrl && (
+                    <a href={e.resolutionPhotoUrl} target="_blank" rel="noopener noreferrer" title="View resolution photo">
+                      <img src={e.resolutionPhotoUrl} alt="resolution photo" style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover', border: '1.5px solid #34d399' }} />
+                    </a>
+                  )}
+                  <div style={{ textAlign: 'right', minWidth: 100 }}>
+                    <Badge label={STATUS_LABEL[e.status]} variant={STATUS_VARIANT[e.status]} />
+                    {e.status === 'issue' && (
+                      <div style={{ fontSize: 10, marginTop: 3, color: e.isResolved ? '#059669' : '#dc2626' }}>
+                        {e.isResolved ? '✓ Resolved' : 'Unresolved'}
+                      </div>
+                    )}
+                    {e.completedAt && <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>{new Date(e.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>}
+                  </div>
+                </div>
               </div>
             </div>
           ))}
