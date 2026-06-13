@@ -1,9 +1,10 @@
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { join } from 'path';
 import { mkdirSync, appendFileSync } from 'fs';
 import { AppModule } from './app.module';
+import { multerErrorFilter } from './uploads/uploads.controller';
 
 const bootLogger = new Logger('Bootstrap');
 
@@ -51,6 +52,10 @@ async function bootstrap() {
 
   // Serve uploaded photos as static files at /photos/<filename>
   app.useStaticAssets(uploadsDir, { prefix: '/photos' });
+
+  // Register multer error handler as a raw Express error middleware (4-param signature).
+  // Must be done on the underlying Express app AFTER NestJS middleware is set up.
+  app.use(multerErrorFilter);
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
