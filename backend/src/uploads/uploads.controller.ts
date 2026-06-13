@@ -47,7 +47,8 @@ export class UploadsController {
       storage: diskStorage({
         destination: (_req, _file, cb) => {
           try {
-            const dir = join(process.cwd(), 'uploads');
+            // Honour UPLOAD_DIR env var; fall back to <cwd>/uploads
+            const dir = process.env.UPLOAD_DIR ?? join(process.cwd(), 'uploads');
             mkdirSync(dir, { recursive: true });
             appendLog('debug', `Upload destination resolved: ${dir}`);
             cb(null, dir);

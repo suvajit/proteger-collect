@@ -21,8 +21,9 @@ function logToFile(level: string, message: string, meta?: object) {
 
 async function bootstrap() {
   // Ensure runtime directories exist
-  const uploadsDir = join(process.cwd(), 'uploads');
-  const logsDir   = join(process.cwd(), 'logs');
+  // UPLOAD_DIR env var overrides the default <cwd>/uploads
+  const uploadsDir = process.env.UPLOAD_DIR ?? join(process.cwd(), 'uploads');
+  const logsDir    = join(process.cwd(), 'logs');
   mkdirSync(uploadsDir, { recursive: true });
   mkdirSync(logsDir,    { recursive: true });
 
